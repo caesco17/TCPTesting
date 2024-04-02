@@ -15,9 +15,11 @@
             <Button Text="Open Socket" Clicked="OpenSocket_Clicked">
             </Button>
 
-            <Entry x:Name="MessageEntry">
+            <Entry x:Name="MessageEntry" Text="Custom Message">
                 
             </Entry>
+
+            <Button Text="Select File" Clicked="Button_Clicked"></Button>
 
             <Button Text="Send Message" Clicked="SendMessage_Clicked">
             </Button>
@@ -26,6 +28,8 @@
             <Label x:Name="infoLabel" TextColor="White" Text="info"></Label>
             <Label x:Name="receiveLabel" TextColor="White" Text="response"></Label>
             <Label x:Name="errorLabel" TextColor="Silver" Text="errors"></Label>
+
+            <ProgressBar x:Name="progressBar" ProgressColor="Orange"></ProgressBar>
                         
         </VerticalStackLayout>
     </ScrollView>
