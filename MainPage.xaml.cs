@@ -3,6 +3,7 @@ using System.Net;
 using System.Text;
 using TCPTesting.Services;
 using System.IO;
+using LukeMauiFilePicker;
 
 namespace TCPTesting
 {
@@ -12,11 +13,13 @@ namespace TCPTesting
         private Socket? _socket;
         private bool isOpen = false;
         private string? _resultfile = string.Empty;
+        private IFilePickerService _filePickerService;
 
-        public MainPage(ITCPService service)
+        public MainPage(ITCPService service, IFilePickerService filePickerService)
         {
             InitializeComponent();
             _TCPService = service;
+            _filePickerService = filePickerService;
         }
 
         private void OpenSocket_Clicked(object sender, EventArgs e)
@@ -103,10 +106,7 @@ namespace TCPTesting
 
         private async void  Button_Clicked(object sender, EventArgs e)
         {
-            var files = await FilePicker.Default.PickAsync(new PickOptions
-            {
-                PickerTitle = "Pick file"
-            });
+            var files = await _filePickerService.PickFileAsync("Select File", null);
 
             var _source = await files!.OpenReadAsync();
 

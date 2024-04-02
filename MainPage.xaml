@@ -15,7 +15,7 @@
             <Button Text="Open Socket" Clicked="OpenSocket_Clicked">
             </Button>
 
-            <Entry x:Name="MessageEntry" Text="Custom Message">
+            <Entry x:Name="MessageEntry" Text="">
                 
             </Entry>
 

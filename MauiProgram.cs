@@ -19,6 +19,7 @@ namespace TCPTesting
 #if DEBUG
     		builder.Logging.AddDebug();
             builder.Services.AddTransient<ITCPService, TCPService>();
+            builder.Services.AddFilePicker();
 #endif
 
             return builder.Build();
