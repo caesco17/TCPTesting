@@ -1,12 +1,16 @@
-﻿namespace TCPTesting
+﻿using TCPTesting.Services;
+
+namespace TCPTesting
 {
     public partial class App : Application
     {
-        public App()
+        private ITCPService _tcpService;
+        public App(ITCPService tcpService)
         {
             InitializeComponent();
+            _tcpService = tcpService;
 
-            MainPage = new AppShell();
+            MainPage = new MainPage(_tcpService);
         }
     }
 }

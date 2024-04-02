@@ -1,53 +1,51 @@
 ﻿using System.Net.Sockets;
 using System.Net;
 using System.Text;
+using TCPTesting.Services;
 
 namespace TCPTesting
 {
     public partial class MainPage : ContentPage
     {
-        public MainPage()
+        private ITCPService _TCPService;
+        private Socket? _socket;
+        private bool isOpen = false;
+        public MainPage(ITCPService service)
         {
             InitializeComponent();
+            _TCPService = service;
         }
 
-        private async void Button_Clicked(object sender, EventArgs e)
+        private async void OpenSocket_Clicked(object sender, EventArgs e)
         {
             string formipAddress = IpEntry.Text.Trim();
-            string formMessage = MessageEntry.Text.Trim();
-
+            errorLabel.Text = string.Empty;
 
             var data = formipAddress.Split(":").ToList();
+
+            if(data.Count != 2)
+            {
+                errorLabel.Text = "Invalid IP.";
+                return;
+            }
 
             string baseIp = data[0];
             int basePort= Convert.ToInt32(data[1].ToString());
 
             try
             {
-                IPAddress ipAddress = System.Net.IPAddress.Parse(baseIp);
-                IPEndPoint ipEndPoint = new(ipAddress, basePort);
-
-                using Socket client = new(ipEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-                await client.ConnectAsync(ipEndPoint);
-                while (true)
+                if (isOpen)
                 {
-                    var messageBytes = Encoding.UTF8.GetBytes(formMessage);
-                    _ = await client.SendAsync(messageBytes, SocketFlags.None);
-
-                    infoLabel.Text = $"Socket client sent message: \"{formMessage}\"";
-
-                    var buffer = new byte[1_024];
-                    var received = await client.ReceiveAsync(buffer, SocketFlags.None);
-                    var response = Encoding.UTF8.GetString(buffer, 0, received);
-                    Thread.Sleep(1000);
-
-                    receiveLabel.Text = $"Socket client received acknowledgment: \"{response}\"";
-                    break;
-                    
+                    _socket!.Shutdown(SocketShutdown.Both);
+                    isOpen = false;
+                }
+                else
+                {
+                    _socket = _TCPService.GetSocket(baseIp, basePort);
+                    await _socket!.ConnectAsync(_TCPService.getEndPoint()!);
+                    isOpen = true;
                 }
 
-                client.Shutdown(SocketShutdown.Both);
             }
             catch (Exception ex)
             {
@@ -56,8 +54,27 @@ namespace TCPTesting
             }          
         }
 
+        private async void SendMessage_Clicked(object sender, EventArgs e)
+        {
+            string formMessage = MessageEntry.Text.Trim();
+            infoLabel.Text = "";
+
+            if (isOpen)
+            {
+
+                var messageBytes = Encoding.UTF8.GetBytes(formMessage);
+                _ = await _socket!.SendAsync(messageBytes, SocketFlags.None);
+
+                infoLabel.Text = $"Socket client sent message: \"{formMessage}\"";
 
 
+                var buffer = new byte[1_024];
+                var received = await _socket!.ReceiveAsync(buffer, SocketFlags.None);
+                var response = Encoding.UTF8.GetString(buffer, 0, received);
+                Thread.Sleep(1000);
+
+                receiveLabel.Text = $"Socket client received: \"{response}\"";
+            }
+        }
     }
-
 }

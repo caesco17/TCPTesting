@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using TCPTesting.Services;
 
 namespace TCPTesting
 {
@@ -17,6 +18,7 @@ namespace TCPTesting
 
 #if DEBUG
     		builder.Logging.AddDebug();
+            builder.Services.AddTransient<ITCPService, TCPService>();
 #endif
 
             return builder.Build();
