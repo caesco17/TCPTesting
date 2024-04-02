@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TCPTesting.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,0"
+            Spacing="25">
+
+            <Entry x:Name="IpEntry" >
+                
+            </Entry>
+            
+            <Entry x:Name="MessageEntry">
+                
+            </Entry>
+            <Button Text="Send Message" Clicked="Button_Clicked">
+            </Button>
+
+            <Label x:Name="infoLabel" TextColor="White" Text="info"></Label>
+            <Label x:Name="receiveLabel" TextColor="White" Text="info"></Label>
+            <Label x:Name="errorLabel" TextColor="Silver" Text="errors"></Label>
+            
+            
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
