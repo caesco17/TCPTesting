@@ -11,7 +11,7 @@ namespace TCPTesting
     {
         private ITCPService _TCPService;
         private Socket? _socket;
-        private bool isOpen = false;
+        public bool isOpen = false;
         private string? _resultfile = string.Empty;
         private IFilePickerService _filePickerService;
 
@@ -20,11 +20,15 @@ namespace TCPTesting
             InitializeComponent();
             _TCPService = service;
             _filePickerService = filePickerService;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         }
 
         private void OpenSocket_Clicked(object sender, EventArgs e)
         {
+            string baseIp = string.Empty;
+            int basePort = 0;
             string formipAddress = IpEntry.Text.Trim();
+
             errorLabel.Text = string.Empty;
 
             var data = formipAddress.Split(":").ToList();
@@ -35,8 +39,15 @@ namespace TCPTesting
                 return;
             }
 
-            string baseIp = data[0];
-            int basePort= Convert.ToInt32(data[1].ToString());
+            if (Int32.TryParse(data[1].ToString(), out basePort))
+            {
+                baseIp = data[0];
+            }
+            else
+            {
+                errorLabel.Text = "Invalid Port.";
+                return;
+            }
 
             try
             {
@@ -44,10 +55,15 @@ namespace TCPTesting
                 {
                     _socket!.Shutdown(SocketShutdown.Both);
                     isOpen = false;
+                    IsSocketOpen.IsChecked = false;
+                    btnSocket.Text = "Open Socket";
                 }
                 else
                 {
                     _socket = _TCPService.GetSocket(baseIp, basePort);
+                    isOpen = true;
+                    IsSocketOpen.IsChecked = true;
+                    btnSocket.Text = "Close Socket";
                 }
 
             }
@@ -55,15 +71,15 @@ namespace TCPTesting
             {
                 errorLabel.Text = ex.Message.ToString();
                 throw;
-            }          
+            }
         }
 
         private async void SendMessage_Clicked(object sender, EventArgs e)
         {
             await _socket!.ConnectAsync(_TCPService.getEndPoint()!);
-            isOpen = true;
-
+            //StartSocketListener(_socket);
             await progressBar.ProgressTo(0, 500, Easing.Linear);
+
             string formMessage = MessageEntry.Text;
             infoLabel.Text = "";
 
@@ -76,13 +92,14 @@ namespace TCPTesting
                     infoLabel.Text = $"Socket client sent message: \"{messageBytes}\"";
                     _resultfile = string.Empty;
                     await progressBar.ProgressTo(0.75, 500, Easing.Linear);
+                    //Task.Delay(5000);
                     _socket.Disconnect(true);
                 }
                 else if (formMessage.Length > 0)
                 {
                     var messageBytes = Encoding.UTF8.GetBytes(formMessage);
                     _ = await _socket!.SendAsync(messageBytes, SocketFlags.None);
-                    infoLabel.Text = $"Socket client sent message: \"{messageBytes}\"";
+                    infoLabel.Text = $"Socket client sent message: \"{formMessage}\"";
                     await progressBar.ProgressTo(0.75, 500, Easing.Linear);
                     _socket.Disconnect(true);
                 }
@@ -91,20 +108,11 @@ namespace TCPTesting
                     _socket.Disconnect(true);
                     return;
                 }
-
-
-                //var buffer = new byte[1_024];
-                //var received = await _socket!.ReceiveAsync(buffer, SocketFlags.None);
-                //var response = Encoding.UTF8.GetString(buffer, 0, received);
-                //Thread.Sleep(1000);
-
-                //receiveLabel.Text = $"Socket client received: \"{response}\"";
                 await progressBar.ProgressTo(1, 500, Easing.Linear);
-                isOpen = false;
             }
         }
 
-        private async void  Button_Clicked(object sender, EventArgs e)
+        private async void Button_Clicked(object sender, EventArgs e)
         {
             var files = await _filePickerService.PickFileAsync("Select File", null);
 
@@ -112,6 +120,27 @@ namespace TCPTesting
 
             StreamReader reader = new StreamReader(_source, System.Text.Encoding.UTF8);
             _resultfile = reader.ReadToEnd();
+        }
+
+        private async void StartSocketListener(Socket OpenedSocket)
+        {
+            // Start listening for messages
+            while (OpenedSocket.Connected)
+            {
+                byte[] buffer = new byte[1024];
+                int bytesRead = await OpenedSocket.ReceiveAsync(buffer, SocketFlags.None);
+                if (bytesRead > 0)
+                {
+                    string message = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
+
+                    // Update UI on the UI thread
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        // Update the TextBox with the received message
+                        ListenerText.Text += message + Environment.NewLine;
+                    });
+                }
+            }
         }
     }
 }

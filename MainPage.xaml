@@ -3,35 +3,41 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="TCPTesting.MainPage">
 
-    <ScrollView>
-        <VerticalStackLayout
-            Padding="30,0"
-            Spacing="25">
 
-            <Entry x:Name="IpEntry" >
-                
-            </Entry>
+    <StackLayout Padding="30,0" Spacing="25">
 
-            <Button Text="Open Socket" Clicked="OpenSocket_Clicked">
-            </Button>
+        <Entry x:Name="IpEntry"  Placeholder ="IP:PORT">
 
-            <Entry x:Name="MessageEntry" Text="">
-                
-            </Entry>
+        </Entry>
 
-            <Button Text="Select File" Clicked="Button_Clicked"></Button>
-
-            <Button Text="Send Message" Clicked="SendMessage_Clicked">
-            </Button>
+        <CheckBox x:Name="IsSocketOpen" IsEnabled="False" >
+            
+        </CheckBox>
+        
+        <Button x:Name="btnSocket" Text="Open Socket" Clicked="OpenSocket_Clicked">
+        </Button>
 
 
-            <Label x:Name="infoLabel" TextColor="White" Text="info"></Label>
-            <Label x:Name="receiveLabel" TextColor="White" Text="response"></Label>
-            <Label x:Name="errorLabel" TextColor="Silver" Text="errors"></Label>
+        <Entry x:Name="MessageEntry" Text="" Placeholder ="Custom Message or select a file">
 
-            <ProgressBar x:Name="progressBar" ProgressColor="Orange"></ProgressBar>
-                        
-        </VerticalStackLayout>
-    </ScrollView>
+        </Entry>
 
+        <Button Text="Select File" Clicked="Button_Clicked"></Button>
+
+
+
+        <Button Text="Send Message" Clicked="SendMessage_Clicked">
+        </Button>
+
+        <Label x:Name="infoLabel" TextColor="White" Text="info"></Label>
+        <Label x:Name="errorLabel" TextColor="Silver" Text="errors"></Label>
+
+        <ProgressBar x:Name="progressBar" ProgressColor="Orange"></ProgressBar>
+
+        <Entry x:Name="ListenerText" Placeholder ="Listener Data">
+
+        </Entry>
+        
+    </StackLayout>
+        
 </ContentPage>
